@@ -1,0 +1,32 @@
+# ── Python ──────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+
+# ── Virtual Environments ───────────────────
+venv/
+env/
+.venv/
+.env/
+
+# ── IDE / Editor ───────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ── Dataset (too large for GitHub) ─────────
+ML/data/Dataset/*.txt
+
+# ── Models folder: ONLY keep model.pth + metrics.txt ──
+ML/models/**/*.png
+ML/models/**/*.npy
+ML/models/**/config.json
+ML/models/comparison/
