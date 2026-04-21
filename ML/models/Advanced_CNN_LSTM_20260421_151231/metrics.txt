@@ -1,0 +1,24 @@
+MODEL: Advanced CNN-LSTM
+
+================= CORE METRICS =================
+RMSE:            13.7778
+NASA Score:      700.1400
+
+================= REGRESSION =================
+MAE:             10.4495
+MAPE:            18.8689 %
+R2 Score:        0.8945
+
+================= UNCERTAINTY =================
+Mean Uncertainty: 10.8150
+Max Uncertainty:  21.0042
+Min Uncertainty:  4.4210
+
+================= CONFIDENCE =================
+Mean Confidence: 0.0923
+Min Confidence:  0.0454
+
+================= ERROR ANALYSIS =================
+Mean Error:      -2.5539
+Std Error:       13.5390
+Max Abs Error:   60.6172

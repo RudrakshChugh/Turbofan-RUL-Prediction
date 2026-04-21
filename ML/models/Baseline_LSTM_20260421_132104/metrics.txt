@@ -1,13 +1,13 @@
 MODEL: Baseline LSTM
 
 ================= CORE METRICS =================
-RMSE:            17.8682
-NASA Score:      1422.0865
+RMSE:            14.2230
+NASA Score:      828.9059
 
 ================= REGRESSION =================
-MAE:             13.8173
-MAPE:            34.7909 %
-R2 Score:        0.8226
+MAE:             10.8497
+MAPE:            22.5816 %
+R2 Score:        0.8876
 
 ================= UNCERTAINTY =================
 Mean Uncertainty: 0.0000
@@ -19,6 +19,6 @@ Mean Confidence: 1.0000
 Min Confidence:  1.0000
 
 ================= ERROR ANALYSIS =================
-Mean Error:      1.9943
-Std Error:       17.7566
-Max Abs Error:   65.5985
+Mean Error:      0.5787
+Std Error:       14.2112
+Max Abs Error:   57.2091
