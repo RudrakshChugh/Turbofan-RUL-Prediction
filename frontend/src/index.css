@@ -1,0 +1,58 @@
+:root {
+  --ink:     #0D0D0E;
+  --ink2:    #3A3A3C;
+  --ink3:    #8A8A8D;
+  --rule:    #DCDCDE;
+  --paper:   #F6F5F2;
+  --panel:   #FFFFFF;
+  --red:     #C0302A;
+  --amber:   #B87020;
+  --green:   #2A6B40;
+  --blue:    #1B4F8A;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+}
+
+.section-header {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding-top: 20px;
+  border-top: 1px solid var(--ink);
+  margin-bottom: 20px;
+}
+
+.pane {
+  background-color: var(--panel);
+}
+
+.multi-pane {
+  display: grid;
+  gap: 1px;
+  background-color: var(--rule);
+  border: 1px solid var(--rule);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+}
