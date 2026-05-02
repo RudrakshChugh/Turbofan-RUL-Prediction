@@ -299,8 +299,9 @@ def generate_comparison(save_dir: str, all_metrics: list,
 # ─────────────────────────────────────────────
 def main():
     # ── Configuration ──────────────────────────
-    base_dir   = r"c:\Users\rudra\Desktop\RUL Predict\ML\data\Dataset"
-    save_dir   = r"c:\Users\rudra\Desktop\RUL Predict\ML\models"
+    _ml_root   = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    base_dir   = os.path.join(_ml_root, "data", "Dataset")
+    save_dir   = os.path.join(_ml_root, "models")
     device     = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     seq_length = 50
