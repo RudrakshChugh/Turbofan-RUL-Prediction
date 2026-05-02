@@ -53,8 +53,12 @@ RUL Predict/
 |   +-- training/
 |       |-- train.py             # Training loops, loss functions, scheduling
 |       +-- main.py              # End-to-end pipeline runner
-|-- backend/                     # (Reserved for API serving)
-|-- frontend/                    # (Reserved for dashboard UI)
+|-- backend/
+|   +-- app.py                   # FastAPI server serving ML artifacts
+|-- frontend/
+|   |-- src/                     # React dashboard UI components
+|   |-- package.json
+|   +-- vite.config.js
 +-- .gitignore
 ```
 
@@ -144,6 +148,13 @@ venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 ```
 
+### Frontend Setup (Node.js required)
+
+```bash
+cd frontend
+npm install
+```
+
 ### Dataset
 
 Download the CMAPSS dataset from the [NASA Prognostics Data Repository](https://data.nasa.gov/Aerospace/CMAPSS-Jet-Engine-Simulated-Data/ff5v-kuh6/about_data) and place the following files in `ML/data/Dataset/`:
@@ -156,23 +167,34 @@ Download the CMAPSS dataset from the [NASA Prognostics Data Repository](https://
 
 ## Usage
 
-Run the full pipeline (data preparation, training both models, evaluation, comparison, and maintenance alerts):
+Run the ML pipeline (data preparation, training, evaluation, and saving artifacts):
 
 ```bash
 cd ML/training
 python main.py
 ```
 
-This will:
-1. Load and preprocess the FD004 dataset with condition-aware normalization
-2. Train the Baseline Bidirectional LSTM with early stopping
-3. Train the Advanced CNN-LSTM with domain adversarial training
-4. Evaluate both models using RMSE and the NASA Scoring Function
-5. Generate per-model metrics, plots, and uncertainty estimates
-6. Produce a side-by-side model comparison
-7. Output maintenance alert decisions for all 248 test engines
+This will train both models and save all artifacts (weights, metrics, `.npy` predictions) to `ML/models/`.
 
-All artifacts (weights, metrics, plots) are saved to timestamped directories under `ML/models/`.
+### 2. Start the Backend API
+
+The FastAPI server reads the saved artifacts and serves them to the frontend:
+
+```bash
+# Ensure your virtual environment is active
+python backend/app.py
+```
+*The API will run at `http://localhost:8000`*
+
+### 3. Start the Frontend Dashboard
+
+In a new terminal window:
+
+```bash
+cd frontend
+npm run dev
+```
+*The dashboard will be available at `http://localhost:5173`*
 
 ---
 
