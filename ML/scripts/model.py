@@ -51,6 +51,35 @@ class BaselineLSTM(nn.Module):
         rul_pred = self.out(x)
         return rul_pred
 
+class BaselineRNN(nn.Module):
+    def __init__(self, input_size, hidden_size=128, num_layers=3, dropout=0.2,
+                 bidirectional=True):
+        super(BaselineRNN, self).__init__()
+        self.bidirectional = bidirectional
+        self.rnn = nn.RNN(
+            input_size=input_size, 
+            hidden_size=hidden_size, 
+            num_layers=num_layers, 
+            batch_first=True, 
+            dropout=dropout if num_layers > 1 else 0,
+            bidirectional=bidirectional
+        )
+        fc_input = hidden_size * 2 if bidirectional else hidden_size
+        self.fc1 = nn.Linear(fc_input, 64)
+        self.relu = nn.ReLU()
+        self.dropout = nn.Dropout(dropout)
+        self.out = nn.Linear(64, 1)
+
+    def forward(self, x):
+        rnn_out, hn = self.rnn(x)
+        last_hidden = rnn_out[:, -1, :] 
+        
+        x = self.fc1(last_hidden)
+        x = self.relu(x)
+        x = self.dropout(x)
+        rul_pred = self.out(x)
+        return rul_pred
+
 class AdvancedCNNLSTM(nn.Module):
     def __init__(self, input_size, seq_len, num_domains=6, dropout_rate=0.4):
         super(AdvancedCNNLSTM, self).__init__()

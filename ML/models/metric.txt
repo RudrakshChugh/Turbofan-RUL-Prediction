@@ -1,3 +1,4 @@
 === FINAL MODEL METRICS ===
+Baseline RNN      RMSE: 18.45  |  NASA Score: 1651.43
 Baseline LSTM     RMSE: 14.22  |  NASA Score: 828.91
 Advanced CNN-LSTM RMSE: 13.78  |  NASA Score: 700.14

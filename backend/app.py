@@ -23,6 +23,7 @@ ML_DIR       = os.path.join(PROJECT_ROOT, "ML")
 DATA_DIR     = os.path.join(ML_DIR, "data", "Dataset")
 MODEL_DIR    = os.path.join(ML_DIR, "models", "Advanced_CNN_LSTM")
 BASELINE_DIR = os.path.join(ML_DIR, "models", "Baseline_LSTM")
+RNN_DIR      = os.path.join(ML_DIR, "models", "Baseline_RNN")
 
 # Ensure scripts/ is importable
 sys.path.insert(0, os.path.join(ML_DIR, "scripts"))
@@ -143,6 +144,7 @@ def parse_metrics(filepath):
 
 parsed_metrics = parse_metrics(os.path.join(MODEL_DIR, "metrics.txt"))
 baseline_metrics = parse_metrics(os.path.join(BASELINE_DIR, "metrics.txt"))
+rnn_metrics = parse_metrics(os.path.join(RNN_DIR, "metrics.txt"))
 
 model_config = {}
 config_path = os.path.join(MODEL_DIR, "config.json")
@@ -408,11 +410,12 @@ def get_metrics():
     return {
         "advanced": parsed_metrics,
         "baseline": baseline_metrics,
+        "rnn": rnn_metrics,
         "config": model_config,
         "comparison": {
-            "models": ["Baseline LSTM", "Advanced CNN-LSTM"],
-            "rmse": [baseline_metrics.get("RMSE", 0), parsed_metrics.get("RMSE", 0)],
-            "nasa": [baseline_metrics.get("NASA Score", 0), parsed_metrics.get("NASA Score", 0)],
+            "models": ["Baseline RNN", "Baseline LSTM", "Advanced CNN-LSTM"],
+            "rmse": [rnn_metrics.get("RMSE", 0), baseline_metrics.get("RMSE", 0), parsed_metrics.get("RMSE", 0)],
+            "nasa": [rnn_metrics.get("NASA Score", 0), baseline_metrics.get("NASA Score", 0), parsed_metrics.get("NASA Score", 0)],
         },
     }
 

@@ -164,6 +164,92 @@ def train_baseline(model, train_loader: DataLoader, val_loader: DataLoader,
 
     return model, train_history, val_history
 
+# ─────────────────────────────────────────────
+#  Baseline RNN training
+# ─────────────────────────────────────────────
+def train_baseline_rnn(model, train_loader: DataLoader, val_loader: DataLoader,
+                       epochs: int = 50, lr: float = 0.001,
+                       device: str = 'cpu', save_dir: str = 'ML/models'):
+    """
+    Returns
+    -------
+    model            : best-weight model
+    train_history    : list of per-epoch train losses
+    val_history      : list of per-epoch val losses
+    """
+    os.makedirs(save_dir, exist_ok=True)
+    best_ckpt = os.path.join(save_dir, "model.pth")
+
+    criterion     = nn.MSELoss()
+    optimizer     = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler     = optim.lr_scheduler.ReduceLROnPlateau(
+                        optimizer, mode='min', factor=0.5, patience=3)
+    early_stopping = EarlyStopping(patience=10)
+
+    model.to(device)
+    train_history, val_history = [], []
+    best_val_loss = float('inf')
+
+    print("--- Starting Training: Baseline RNN ---")
+    for epoch in range(epochs):
+
+        # ── Training ──────────────────────────
+        model.train()
+        running_loss = 0.0
+        for seqs, ruls, _ in train_loader:
+            seqs = seqs.to(device)
+            ruls = ruls.to(device)
+
+            optimizer.zero_grad()
+            preds = model(seqs).squeeze(-1)
+            loss  = criterion(preds, ruls)
+            loss.backward()
+
+            # Gradient clipping
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+
+            optimizer.step()
+            running_loss += loss.item()
+
+        train_loss = running_loss / len(train_loader)
+
+        # ── Validation ────────────────────────
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for seqs, ruls, _ in val_loader:
+                seqs = seqs.to(device)
+                ruls = ruls.to(device)
+                preds = model(seqs).squeeze(-1)
+                val_loss += criterion(preds, ruls).item()
+        val_loss /= len(val_loader)
+
+        train_history.append(train_loss)
+        val_history.append(val_loss)
+
+        print(f"Epoch {epoch+1:>3}/{epochs} | "
+              f"Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f}")
+
+        scheduler.step(val_loss)
+        early_stopping(val_loss)
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            torch.save(model.state_dict(), best_ckpt)
+
+        if early_stopping.early_stop:
+            print("Early stopping triggered.")
+            break
+
+    # Reload best weights before returning
+    model.load_state_dict(torch.load(best_ckpt, map_location=device))
+
+    plot_losses(train_history, val_history,
+                'Baseline RNN Learning Curves',
+                os.path.join(save_dir, 'combined_loss_curve.png'))
+
+    return model, train_history, val_history
+
 
 # ─────────────────────────────────────────────
 #  Advanced CNN-LSTM (DANN) training

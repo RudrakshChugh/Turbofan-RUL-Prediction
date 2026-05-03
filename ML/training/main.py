@@ -13,20 +13,19 @@ from sklearn.metrics import mean_absolute_error, r2_score
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
 
 from data_prep import prepare_data, load_data, SETTING_NAMES, RUL_CAP
-from model import BaselineLSTM, AdvancedCNNLSTM
-from train import train_baseline, train_advanced
+from model import BaselineLSTM, AdvancedCNNLSTM, BaselineRNN
+from train import train_baseline, train_advanced, train_baseline_rnn
 from evaluate import evaluate_model
 from decision_logic import generate_maintenance_alerts
 
 
 # ─────────────────────────────────────────────
-#  HELPER: Create unique timestamped model dir
+#  HELPER: Create model dir (overwrites old)
 # ─────────────────────────────────────────────
 def create_model_dir(save_dir: str, model_name: str) -> str:
-    """Return a new flat directory for one model run."""
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    """Return a flat directory for one model run. Overwrites existing."""
     safe_name = model_name.replace(" ", "_")
-    model_dir = os.path.join(save_dir, f"{safe_name}_{timestamp}")
+    model_dir = os.path.join(save_dir, safe_name)
     os.makedirs(model_dir, exist_ok=True)
     return model_dir
 
@@ -291,7 +290,7 @@ def generate_comparison(save_dir: str, all_metrics: list,
     with open(os.path.join(comparison_dir, "summary.txt"), "w") as f:
         f.write("\n".join(lines))
 
-    print(f"[*] Comparison artefacts saved → {comparison_dir}")
+    print(f"[*] Comparison artefacts saved -> {comparison_dir}")
 
 
 # ─────────────────────────────────────────────
@@ -362,6 +361,38 @@ def main():
     all_predictions["Baseline LSTM"] = b_mean
     print(f"[✓] Baseline LSTM artefacts saved → {b_dir}")
 
+    # ── Phase 2.5: Baseline RNN ─────────────────
+    print("\n[====== PHASE 2.5: BASELINE RNN ======]")
+    rnn_model = BaselineRNN(input_size=n_feats, hidden_size=128, num_layers=3)
+
+    r_dir = create_model_dir(save_dir, "Baseline_RNN")
+    save_config(r_dir, "Baseline RNN", epochs, batch_size, lr, seq_length, device)
+
+    rnn_model, r_train_losses, r_val_losses = train_baseline_rnn(
+        rnn_model, train_loader, val_loader,
+        epochs=epochs, lr=lr, device=device, save_dir=r_dir
+    )
+
+    print("Evaluating Baseline RNN …")
+    r_mean, r_std, true_rul_rnn, r_rmse, r_nasa = evaluate_model(
+        rnn_model, test_loader,
+        model_name="Baseline RNN", device=device,
+        mc_passes=1, out_dir=r_dir, rul_cap=RUL_CAP
+    )
+    r_std = np.zeros_like(r_mean)
+
+    r_mean   = np.maximum(r_mean * RUL_CAP, 0)
+    r_std    = r_std    * RUL_CAP
+
+    torch.save(rnn_model.state_dict(), os.path.join(r_dir, "model.pth"))
+    save_predictions(r_dir, r_mean, true_rul, r_std)
+    r_metrics = save_metrics(r_dir, "Baseline RNN", r_mean, true_rul, r_std, r_rmse, r_nasa)
+    save_plots(r_dir, "Baseline RNN", r_mean, true_rul, r_std, r_train_losses, r_val_losses)
+
+    all_metrics.append(r_metrics)
+    all_predictions["Baseline RNN"] = r_mean
+    print(f"[✓] Baseline RNN artefacts saved → {r_dir}")
+
     # ── Phase 3: Advanced CNN-LSTM ─────────────
     print("\n[====== PHASE 3: ADVANCED CNN-LSTM ======]")
     advanced_model = AdvancedCNNLSTM(
@@ -410,6 +441,7 @@ def main():
     metrics_path = os.path.join(save_dir, "metric.txt")
     with open(metrics_path, "w") as f:
         f.write("=== FINAL MODEL METRICS ===\n")
+        f.write(f"Baseline RNN      RMSE: {r_rmse:.2f}  |  NASA Score: {r_nasa:.2f}\n")
         f.write(f"Baseline LSTM     RMSE: {b_rmse:.2f}  |  NASA Score: {b_nasa:.2f}\n")
         f.write(f"Advanced CNN-LSTM RMSE: {a_rmse:.2f}  |  NASA Score: {a_nasa:.2f}\n")
     print(f"[*] Top-level metrics → {metrics_path}")

@@ -597,7 +597,7 @@ function SystemView() {
   if (loading) return <div style={{ padding: '32px', fontFamily: '"IBM Plex Mono"' }}>Loading metrics...</div>;
   if (!metrics) return <div style={{ padding: '32px', fontFamily: '"IBM Plex Mono"' }}>No metrics available.</div>;
 
-  const MetricCard = ({ title, baseline, advanced, lowerIsBetter = true }) => {
+  const MetricCard = ({ title, rnn, baseline, advanced, lowerIsBetter = true }) => {
     const imp = baseline ? ((baseline - advanced) / baseline * 100) : 0;
     const isImproved = lowerIsBetter ? imp > 0 : imp < 0;
     const absImp = Math.abs(imp).toFixed(1);
@@ -615,9 +615,19 @@ function SystemView() {
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '11px', color: 'var(--ink3)', marginBottom: '4px' }}>Baseline</div>
-            <div style={{ fontSize: '16px', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--ink2)' }}>
-              {baseline?.toFixed(2) || 'N/A'}
+            <div style={{ display: 'flex', gap: '24px', justifyContent: 'flex-end' }}>
+              <div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', marginBottom: '4px' }}>Baseline RNN</div>
+                <div style={{ fontSize: '16px', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--ink2)' }}>
+                  {rnn?.toFixed(2) || 'N/A'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', marginBottom: '4px' }}>Baseline LSTM</div>
+                <div style={{ fontSize: '16px', fontFamily: '"IBM Plex Mono", monospace', color: 'var(--ink2)' }}>
+                  {baseline?.toFixed(2) || 'N/A'}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -628,10 +638,11 @@ function SystemView() {
             color: isImproved ? 'var(--green)' : 'var(--red)',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px'
+            gap: '6px',
+            marginTop: '12px'
           }}>
             <span>{isImproved ? '↓' : '↑'}</span>
-            <span>{absImp}% vs Baseline</span>
+            <span>{absImp}% vs Baseline LSTM</span>
           </div>
         )}
       </div>
@@ -645,18 +656,21 @@ function SystemView() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '48px' }}>
         <MetricCard 
           title="Root Mean Square Error (RMSE)" 
-          baseline={metrics.baseline['RMSE']} 
-          advanced={metrics.advanced['RMSE']} 
+          rnn={metrics.rnn?.['RMSE']} 
+          baseline={metrics.baseline?.['RMSE']} 
+          advanced={metrics.advanced?.['RMSE']} 
         />
         <MetricCard 
           title="NASA Asymmetric Score" 
-          baseline={metrics.baseline['NASA Score']} 
-          advanced={metrics.advanced['NASA Score']} 
+          rnn={metrics.rnn?.['NASA Score']} 
+          baseline={metrics.baseline?.['NASA Score']} 
+          advanced={metrics.advanced?.['NASA Score']} 
         />
         <MetricCard 
           title="Mean Absolute Error (MAE)" 
-          baseline={metrics.baseline['MAE']} 
-          advanced={metrics.advanced['MAE']} 
+          rnn={metrics.rnn?.['MAE']} 
+          baseline={metrics.baseline?.['MAE']} 
+          advanced={metrics.advanced?.['MAE']} 
         />
       </div>
 
