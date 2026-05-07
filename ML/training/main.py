@@ -8,7 +8,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
 from torch.utils.data import DataLoader
-from sklearn.metrics import mean_absolute_error, r2_score
+from sklearn.metrics import mean_absolute_error, r2_score, precision_score, recall_score, f1_score
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'scripts')))
 
@@ -89,6 +89,19 @@ def save_metrics(model_dir: str, model_name: str,
     std_err     = float(np.std(errors))
     max_abs_err = float(np.max(abs_errors))
 
+    # Threshold metrics
+    threshold = 30
+    true_critical = (true_rul <= threshold).astype(int)
+    pred_critical = (pred_mean <= threshold).astype(int)
+    precision = float(precision_score(true_critical, pred_critical, zero_division=0))
+    recall    = float(recall_score(true_critical, pred_critical, zero_division=0))
+    f1        = float(f1_score(true_critical, pred_critical, zero_division=0))
+
+    # Coverage Probability (95% CI is roughly +/- 2 std)
+    lower_bound = pred_mean - 2 * pred_std
+    upper_bound = pred_mean + 2 * pred_std
+    coverage = np.mean((true_rul >= lower_bound) & (true_rul <= upper_bound)) * 100
+
     lines = [
         f"MODEL: {model_name}\n",
         "================= CORE METRICS =================",
@@ -109,10 +122,17 @@ def save_metrics(model_dir: str, model_name: str,
         f"Mean Confidence: {mean_conf:.4f}",
         f"Min Confidence:  {min_conf:.4f}",
         "",
-        "================= ERROR ANALYSIS =================",
+        "================= ERROR ANALYSIS =================".format(),
         f"Mean Error:      {mean_err:.4f}",
         f"Std Error:       {std_err:.4f}",
         f"Max Abs Error:   {max_abs_err:.4f}",
+        "",
+        "================= OPERATIONAL METRICS =================",
+        f"Precision (RUL<30): {precision:.4f}",
+        f"Recall (RUL<30):    {recall:.4f}",
+        f"F1-Score (RUL<30):  {f1:.4f}",
+        f"95% CI Coverage:    {coverage:.2f}%",
+
     ]
     with open(os.path.join(model_dir, "metrics.txt"), "w") as f:
         f.write("\n".join(lines))
@@ -126,6 +146,11 @@ def save_metrics(model_dir: str, model_name: str,
         "r2": r2,
         "mean_uncertainty": mean_unc,
         "mean_confidence": mean_conf,
+        "precision": precision,
+        "recall": recall,
+        "f1": f1,
+        "coverage": coverage,
+        "max_abs_err": max_abs_err,
     }
 
 
@@ -285,6 +310,10 @@ def generate_comparison(save_dir: str, all_metrics: list,
             f"   NASA Score:       {m['nasa_score']:.4f}",
             f"   MAE:              {m['mae']:.4f}",
             f"   R2 Score:         {m['r2']:.4f}",
+            f"   MAPE:             {m['mape']:.4f}%",
+            f"   Max Error:        {m['max_abs_err']:.4f}",
+            f"   F1-Score (<30):   {m['f1']:.4f}",
+            f"   Coverage (95%):   {m['coverage']:.2f}%",
             f"   Mean Confidence:  {m['mean_confidence']:.4f}",
         ]
     with open(os.path.join(comparison_dir, "summary.txt"), "w") as f:

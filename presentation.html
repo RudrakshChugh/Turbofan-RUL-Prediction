@@ -367,7 +367,10 @@ Output: Single predicted value (Remaining Useful Life)
             <ul>
                 <li><strong>RMSE (Root Mean Square Error):</strong> Measures the overall mathematical variance of predictions. Lower is better.</li>
                 <li><strong>MAE (Mean Absolute Error):</strong> The average number of cycles the prediction was off by.</li>
+                <li><strong>MAPE (Mean Absolute Percentage Error):</strong> The error as a percentage relative to the true remaining life.</li>
                 <li><strong>NASA Score:</strong> A custom asymmetric score. Penalizes late predictions exponentially. Lower is significantly better for safety.</li>
+                <li><strong>F1-Score (Threshold &lt; 30):</strong> Treats RUL prediction as a maintenance alert classification. Measures the balance of successfully catching failures versus triggering false alarms.</li>
+                <li><strong>95% CI Coverage:</strong> The percentage of actual engine failures that occurred exactly within the AI's predicted ± uncertainty bounds.</li>
             </ul>
         </div>
 
@@ -391,6 +394,9 @@ Output: Single predicted value (Remaining Useful Life)
                     <th>RMSE ↓</th>
                     <th>MAE ↓</th>
                     <th>NASA Score ↓</th>
+                    <th>MAPE ↓</th>
+                    <th>F1-Score (&lt;30) ↑</th>
+                    <th>95% Coverage ↑</th>
                 </tr>
             </thead>
             <tbody>
@@ -399,18 +405,27 @@ Output: Single predicted value (Remaining Useful Life)
                     <td>18.45</td>
                     <td>14.40</td>
                     <td>1651.43</td>
+                    <td>32.88%</td>
+                    <td>0.833</td>
+                    <td>N/A</td>
                 </tr>
                 <tr>
                     <td>Baseline LSTM</td>
                     <td>14.22</td>
                     <td>10.85</td>
                     <td>828.91</td>
+                    <td>22.58%</td>
+                    <td>0.897</td>
+                    <td>N/A</td>
                 </tr>
                 <tr class="winner">
                     <td>Advanced CNN-LSTM (Proposed)</td>
                     <td>13.78</td>
                     <td>10.45</td>
                     <td>700.14</td>
+                    <td>18.87%</td>
+                    <td>0.916</td>
+                    <td>87.28%</td>
                 </tr>
             </tbody>
         </table>
